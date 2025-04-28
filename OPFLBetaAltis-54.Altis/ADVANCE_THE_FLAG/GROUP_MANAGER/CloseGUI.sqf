@@ -1,0 +1,10 @@
+removeMissionEventHandler ["EachFrame", (uiNamespace getVariable "OPFL_GUI_THREAD")];
+uiNamespace setVariable ["OPFL_GUI_DISPLAY", nil];
+uiNamespace setVariable ["OPFL_GUI_THREAD", nil];
+uiNamespace setVariable ["OPFL_GUI_THREAD_ARG", nil];
+uiNamespace setVariable ["OFPL_GUI_THREAD_LF", nil];
+uiNamespace setVariable ["OPFL_GUI_JOING_TIME", nil];
+uiNamespace setVariable ["OPFL_GUI_OPENG_TIME", nil];
+uiNamespace setVariable ["OPFL_GUI_CLOSENG_TIME", nil];
+uiNamespace setVariable ["OPFL_GUI_KICKG_TIME", nil];
+uiNamespace setVariable ["OPFL_GUI_BOX_SELECTED", nil];

@@ -1,0 +1,1 @@
+player sideChat "I AM THE SAME AS A!";

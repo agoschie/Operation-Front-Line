@@ -1,0 +1,1 @@
+private "_unit";_unit = vehicle player;if (_unit == (_this select 0)) then{	if ([(_this select 0)] call GSC_InSafeZone) then	{		player sideChat "IN SAFE ZONE: Your weapons have no effect...";	};};

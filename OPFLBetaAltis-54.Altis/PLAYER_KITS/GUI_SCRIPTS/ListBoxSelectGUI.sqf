@@ -1,0 +1,1 @@
+private "_listBox";private "_display";private "_index";private "_selectValue";_listBox = _this select 0;_index = _this select 1;

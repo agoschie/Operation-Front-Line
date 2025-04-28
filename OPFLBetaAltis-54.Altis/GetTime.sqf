@@ -1,0 +1,1 @@
+hint ([(OPFL_GAME_TIME - UNITIME)] call GSC_FormatTime);

@@ -1,0 +1,14 @@
+1. You are now playing on an official Operation Front Line (OPFL) server, any violation of our rules can result in a kick, temporary ban, or permanent ban depending on the magnitude of such violations.
+
+2. 
+	Rule #1: Team killing is strictly prohibited. You may be kicked as warning, but continuing may result in a temporary or even permanent ban.
+	
+	Rule #2: To earn rank points, you must finish a match. You only earn rank points while playing, and the quantity  scales with how much time you have spent on the same match.
+	
+	Rule #3: ***DITCHING IS AGAINST THE RULES***. If you ditch a match without rejoining and finishing it, you your account will receive a strike. If you obtain 5 strikes, your account will automatically and temporarily be banned for 24 hours.
+	
+	Rule #4: You are not to be within 100 meters of the enemies base perimeter.
+	
+	Rule #5: Exploits are prohibited, and will be determined on a case by case basis by an admin.
+	
+3. If the game clock says "Waiting for Players", then you are simply playing a team deathmatch and you can earn dog tags. During the "Waiting for Players" phase, the Ranking system is turned off. The waiting phase is a fun way of earning dog tags while the server fills up. However, RULES STILL APPLY.

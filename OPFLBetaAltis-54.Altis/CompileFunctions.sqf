@@ -1,0 +1,30 @@
+private "_scripts";
+private "_CompileFolder";
+
+_scripts = 
+[
+["PKS", "PLAYER_KITS"],
+["PKS", "PLAYER_KITS\WEST"],
+["PKS", "PLAYER_KITS\EAST"],
+["PKS", "PLAYER_KITS\SPECIAL_WEAPONS"],
+["EMP", "PLAYER_KITS\SPECIAL_WEAPONS\EMP\EMP_GUI_SCRIPTS"],
+["EMP", "PLAYER_KITS\SPECIAL_WEAPONS\EMP"],
+["PKS", "PLAYER_KITS\GUI_SCRIPTS"],
+
+["GSC", "GLOBAL_SC_SCRIPTS"],
+
+["PKS_ServerBS", "BUILD_SYSTEM\SERVER_BUILD_SYSTEM"],
+["PKS_ClientBS", "BUILD_SYSTEM\CLIENT_BUILD_SYSTEM"],
+
+["PCS", "PUBLIC_CODE_SYSTEM\CLIENT_RECV_SYSTEM"],
+["PCS", "PUBLIC_CODE_SYSTEM"],
+
+["VRS", "VEHICLE_RESPAWN_SYSTEM"],
+["VRS", "VEHICLE_RESPAWN_SYSTEM\USER_FUNCTIONS"]
+];
+_CompileFolder = compile PreProcessFile "CompileFolder.sqf";
+{
+	_null = _x call _CompileFolder;
+} foreach _scripts;
+
+OPFL_ALL_SCRIPTS_COMPILED = true;

@@ -1,0 +1,32 @@
+private "_unit";
+private "_kitName";
+private "_crate";
+private "_lastKitName";
+_unit = _this select 0;
+_kitName = _this select 1;
+_lastKitName = _this select 2;
+_crate = _this select 3;
+if (!(isNil {_unit getVariable "PKS_KIT_CHANGE_IN_PROGRESS"})) exitWith {};
+_unit setVariable ["KIT_CHANGE_IN_PROGRESS", true];
+if ((_crate getVariable _kitName) > 0) then
+{
+	_crate setVariable [_kitName, ((_crate getVariable _kitName) - 1), true];
+	if (_lastKitName != "DefaultKit") then
+	{
+		_crate setVariable [_lastKitName, ((_crate getVariable _lastKitName) + 1), true];
+	};
+	_unit setVariable ["PKS_LAST_KIT", _kitName];
+	
+	if (!(isNil {_unit getVariable "PKS_KW_SCRIPT"})) then
+	{
+		terminate (_unit getVariable "PKS_KW_SCRIPT");
+	};
+	_kitWatcher = [_unit, _kitName, _crate] spawn PKS_AttachKit;
+	_unit setVariable ["PKS_KW_SCRIPT", _kitWatcher];
+	_null = [[], format ["PLAYER_KIT = PKS_%1; _null = [] spawn PKS_FillKit;", _kitName], (getPlayerUID _unit)] spawn PCS_MPCodeBroadcast;
+}
+else
+{
+	_null = [[], "hint 'OUT OF KIT'", (getPlayerUID _unit)] spawn PCS_MPCodeBroadcast;
+};
+_unit setVariable ["PKS_KIT_CHANGE_IN_PROGRESS", nil];

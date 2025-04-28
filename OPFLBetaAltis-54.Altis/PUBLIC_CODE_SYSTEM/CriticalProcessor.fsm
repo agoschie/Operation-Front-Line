@@ -1,0 +1,38 @@
+class FSM
+{
+  fsmName = "CriticalProcessor";
+  class States
+  {
+    class _
+    {
+      name = "_";
+      init = "";
+      precondition = "";
+      class Links
+      {
+        class _
+        {
+          priority = 0.000000;
+          to= "__1";
+          precondition = "";
+          condition= "[(_this select 0), (_this select 1)] call PCS_CallFnc; true";
+          action= "";
+        };
+      };
+    };
+    class __1
+    {
+      name = "__1";
+      init = "";
+      precondition = "";
+      class Links
+      {
+      };
+    };
+  };
+  initState="_";
+  finalStates[] =
+  {
+    "__1",
+  };
+};

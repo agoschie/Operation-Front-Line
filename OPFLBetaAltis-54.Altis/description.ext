@@ -1,0 +1,1311 @@
+/***************************************************************************
+Description.ext
+14 JAN 2011
+By Goschie and Spyder
+****************************************************************************/
+
+
+
+/***************************************************************************
+Mission settings
+****************************************************************************/
+
+respawn = "BASE";
+respawnDelay = 5;
+disabledAI = false;
+showGPS = 1;
+showCompass = 1;
+showMap = 1;
+showNotePad = 1;
+showWatch = 1;
+
+class Header { gameType = Team; minPlayers = 1; maxPlayers = 86; }; 
+/***************************************************************************
+End
+****************************************************************************/
+
+
+
+/***************************************************************************
+Parmeters below don't edit unless you know what your doing
+****************************************************************************/
+class Params {
+
+	class TimeOfDay {
+
+		title = "Time of Day";
+		values[] = {1337,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23};
+		texts[] = {"Random","00.00","01.00","02.00","03.00","04.00","05.00","06.00","07.00","08.00","09.00","10.00","11.00","12.00","13.00","14.00","15.00","16.00","17.00","1800","19.00","20.00","21.00","22.00","23.00"};
+		default = 12;
+		
+	};
+
+	class Weather {
+
+		title = "Weather Conditions";
+		values[] = {0,1,2,3};
+		texts[] = {"Clear","Stormy","Cloudy","Foggy"};
+		default = 0;
+
+	};
+
+	class RoundMode {
+
+		title = "Round Mode";
+		values[] = {0,1};
+		texts[] = {"OFF", "ON"};
+		default = 0;
+
+	};
+
+	class HiddenZones {
+		title = "Hidden Enemy Flag Zones";
+		values[] = {0,1};
+		texts[] = {"OFF", "ON"};
+		default = 0;
+	};
+
+	class PinnedZones {
+		title = "Flag Zones Become Pinned when Capturing";
+		values[] = {0,1};
+		texts[] = {"OFF", "ON"};
+		default = 0;
+	};
+
+	class VehicleRestriction {
+		title = "Vehicles Become Locked for Flag Carriers";
+		values[] = {0,1};
+		texts[] = {"OFF", "ON"};
+		default = 0;
+	};
+	
+	class OPFL_MISSION_NUMBER {
+		title = "Select battlfield location";
+		values[] = {1,2,3,4};
+		texts[] = {"1", "2", "3", "4"};
+		default = 1;
+	};
+
+};
+/***************************************************************************
+End
+****************************************************************************/
+
+
+
+// include "R3F_ARTY_AND_LOG\desc_include.h"
+#include "DYNAMIC_SETTINGS\DynamicSettingsArma3.hpp"
+#include "PLAYER_KITS\PlayerKits.hpp"
+#include "ADVANCE_THE_FLAG\GROUP_MANAGER\GroupMgr.hpp"
+#include "PUBLIC_CODE_SYSTEM\RANK_MODULE\WelcomeScreenGUI.hpp"
+#include "PUBLIC_CODE_SYSTEM\RANK_MODULE\ShopGUI.hpp"
+//#include "PLAYER_KITS\SPECIAL_WEAPONS\EMP\EMPGUI.hpp"
+/***************************************************************************
+Definitions
+****************************************************************************/
+// Control types
+#define CT_STATIC           0
+#define CT_BUTTON           1
+#define CT_EDIT             2
+#define CT_SLIDER           3
+#define CT_COMBO            4
+#define CT_LISTBOX          5
+#define CT_TOOLBOX          6
+#define CT_CHECKBOXES       7
+#define CT_PROGRESS         8
+#define CT_HTML             9
+#define CT_STATIC_SKEW      10
+#define CT_ACTIVETEXT       11
+#define CT_TREE             12
+#define CT_STRUCTURED_TEXT  13
+#define CT_CONTEXT_MENU     14
+#define CT_CONTROLS_GROUP   15
+#define CT_SHORTCUT_BUTTON  16 // Arma 2 - textured button
+
+#define CT_XKEYDESC         40
+#define CT_XBUTTON          41
+#define CT_XLISTBOX         42
+#define CT_XSLIDER          43
+#define CT_XCOMBO           44
+#define CT_ANIMATED_TEXTURE 45
+#define CT_OBJECT           80
+#define CT_OBJECT_ZOOM      81
+#define CT_OBJECT_CONTAINER 82
+#define CT_OBJECT_CONT_ANIM 83
+#define CT_LINEBREAK        98
+#define CT_USER             99
+#define CT_MAP              100
+#define CT_MAP_MAIN         101
+#define CT_List_N_Box       102
+
+// Static styles
+#define ST_POS            0x0F
+#define ST_HPOS           0x03
+#define ST_VPOS           0x0C
+#define ST_LEFT           0x00
+#define ST_RIGHT          0x01
+#define ST_CENTER         0x02
+#define ST_DOWN           0x04
+#define ST_UP             0x08
+#define ST_VCENTER        0x0c
+
+#define ST_TYPE           0xF0
+#define ST_SINGLE         0
+#define ST_MULTI          16
+#define ST_TITLE_BAR      32
+#define ST_PICTURE        48
+#define ST_FRAME          64
+#define ST_BACKGROUND     80
+#define ST_GROUP_BOX      96
+#define ST_GROUP_BOX2     112
+#define ST_HUD_BACKGROUND 128
+#define ST_TILE_PICTURE   144
+#define ST_WITH_RECT      160
+#define ST_LINE           176
+
+#define ST_SHADOW         0x100
+#define ST_NO_RECT        0x200
+#define ST_KEEP_ASPECT_RATIO  0x800
+
+#define ST_TITLE          ST_TITLE_BAR + ST_CENTER
+
+// Slider styles
+#define SL_DIR            0x400
+#define SL_VERT           0
+#define SL_HORZ           0x400
+
+#define SL_TEXTURES       0x10
+
+// Listbox styles
+#define LB_TEXTURES       0x10
+#define LB_MULTI          0x20
+
+#define FontM             "puristaMedium"
+
+#define SZ_SCREEN_UNIT_W(w) (w * safeZoneW / 100)
+#define SZ_SCREEN_UNIT_H(h) (h * safeZoneH / 100)
+#define POS_SCREEN_UNIT_X(x) (safeZoneX + (x * safeZoneW / 100))
+#define POS_SCREEN_UNIT_Y(y) (safeZoneY + (y * safeZoneH / 100))
+#define TEXT_SIZE(s) (sqrt(safeZoneW*safeZoneH*s*s))
+#include "MapRsc.hpp"
+/***************************************************************************
+End
+****************************************************************************/
+
+
+
+/***************************************************************************
+Titles
+****************************************************************************/
+class RscTitles {
+
+	// Needed for R3F Arty and Log
+	// include "R3F_ARTY_AND_LOG\desc_rsct_include.h"
+/***************************************************************************
+End
+****************************************************************************/
+
+
+
+/***************************************************************************
+OPFL HUD
+****************************************************************************/	
+	titles[]={};
+	class hud
+   	{
+		idd=-1;
+		movingEnable=0;
+	  	fadein=0;
+		//duration=0.3;
+		duration=15000;
+	  	fadeout=1;
+		name="hud";
+		//onLoad="_this call OPFL_Client_ProcessHUDFunctions";
+		onLoad="uiNamespace setVariable ['HUD_UI_DISPLAY', (_this select 0)]";
+		objects[]={};
+		class controlsBackground
+		{
+			class ScoresBackgroundFrame
+			{
+				idc=23612;
+				access = 0;
+				type = CT_STATIC;
+				style = ST_BACKGROUND;
+				shadow = 0;
+				font = "puristaMedium";
+				sizeEx = 0.02;
+				text = "";
+				w = SZ_SCREEN_UNIT_W(29); // + 0.01;
+				h = SZ_SCREEN_UNIT_H(50); // + (0.01 * 4/3);
+				x = POS_SCREEN_UNIT_X(35); // - 0.004;
+				y = POS_SCREEN_UNIT_Y(97.5); // - (0.005 * 4/3);
+				colorBackground[] = {0.4,0.4,0.4,0};
+				colorText[] = {1,1,1,0.9};
+			
+			};
+			
+			class ScoresBackground
+			{
+				idc=23509;
+				type = CT_STATIC;
+				style=ST_PICTURE;
+				sizeEx=0;
+				colorText[] = {0.5,0.5,0.5,0.5};
+				text = "PLAYER_KITS\Pictures\PlayerKitsBackgroundPic.paa";
+				colorBackground[]={1,1,1,0.9};
+				shadow=false;
+				x=POS_SCREEN_UNIT_X(35);
+				y=POS_SCREEN_UNIT_Y(97.5);
+				w=SZ_SCREEN_UNIT_W(29);
+				h=SZ_SCREEN_UNIT_H(2.5);
+				font = "PuristaMedium";
+				
+				
+			};
+			
+			class TimersBackground
+			{
+				idc=23513;
+				access = 0;
+				type = CT_STATIC;
+				style = 0;
+				shadow = 0;
+				font = "puristaMedium";
+				sizeEx = 0.02;
+				text = "";
+				w = SZ_SCREEN_UNIT_W(16.5); // + 0.01;
+				h = SZ_SCREEN_UNIT_H(9); // + (0.01 * 4/3);
+				x = POS_SCREEN_UNIT_X(83.5); // - 0.004;
+				y = POS_SCREEN_UNIT_Y(91); // - (0.005 * 4/3);
+				colorBackground[] = {0,0,0,0.4};
+				colorText[]={0,0,0,0};
+			
+			};
+			
+			class TimersBackgroundDivider
+			{
+				idc=23514;
+				access = 0;
+				type = CT_STATIC;
+				style = 0;
+				shadow = 0;
+				font = "puristaMedium";
+				sizeEx = 0.02;
+				text = "";
+				w = SZ_SCREEN_UNIT_W(0.5); // + 0.01;
+				h = SZ_SCREEN_UNIT_H(9); // + (0.01 * 4/3);
+				x = POS_SCREEN_UNIT_X(92.5); // - 0.004;
+				y = POS_SCREEN_UNIT_Y(91); // - (0.005 * 4/3);
+				colorBackground[] = {1,1,1,0.5};
+				colorText[]={0,0,0,0};
+			
+			};
+			
+			class TimersBackgroundDivider2
+			{
+				idc=23516;
+				access = 0;
+				type = CT_STATIC;
+				style = 0;
+				shadow = 0;
+				font = "puristaMedium";
+				sizeEx = 0.02;
+				text = "";
+				w = SZ_SCREEN_UNIT_W(0.2); // + 0.01;
+				h = SZ_SCREEN_UNIT_H(4.5); // + (0.01 * 4/3);
+				x = POS_SCREEN_UNIT_X(87.9); // - 0.004;
+				y = POS_SCREEN_UNIT_Y(93.25); // - (0.005 * 4/3);
+				colorBackground[] = {1,1,1,0.5};
+				colorText[]={0,0,0,0};
+			
+			};
+			
+			class TimersBackground2
+			{
+				idc=23515;
+				access = 0;
+				type = CT_STATIC;
+				style = 0;
+				shadow = 0;
+				font = "puristaMedium";
+				sizeEx = 0.02;
+				text = "";
+				w = SZ_SCREEN_UNIT_W(9); // + 0.01;
+				h = SZ_SCREEN_UNIT_H(2.16); // + (0.01 * 4/3);
+				x = POS_SCREEN_UNIT_X(83.5); // - 0.004;
+				y = POS_SCREEN_UNIT_Y(91); // - (0.005 * 4/3);
+				colorBackground[] = {0,0,0,0.41};
+				colorText[]={0,0,0,0};
+			
+			};
+			
+			class TimersText
+			{
+				idc=23519;
+				access = 0;
+				type = CT_STATIC;
+				style = 0;
+				shadow = 0;
+				font = "PuristaBold";
+				sizeEx = TEXT_SIZE(0.014);
+				text = "Next Advance";
+				w = SZ_SCREEN_UNIT_W(7); // + 0.01;
+				h = SZ_SCREEN_UNIT_H(2.25); // + (0.01 * 4/3);
+				x = POS_SCREEN_UNIT_X(85.5); // - 0.004;
+				y = POS_SCREEN_UNIT_Y(91); // - (0.005 * 4/3);
+				colorBackground[] = {0,0,0,0};
+				colorText[]={1,1,1,1};
+			
+			};
+			
+			/*
+			class MapExample : RscMapControl
+			{
+				idc = 23400;
+				moveOnEdges = 0;
+				x = 0.2 * safeZoneX;
+				y = 0.2 * safeZoneY;
+				w = 0.6 * safeZoneW;
+				h = 0.6 * safeZoneH;
+
+				onDraw = "_this call HUD_fnc_updateMiniMap";
+			};
+			*/
+		};
+		class controls
+		{
+			class AbstractHUD
+			{
+				type=0;
+				idc=23501;
+				style=16;
+				lineSpacing=1;
+				x=0;
+				y=0;
+				w=SZ_SCREEN_UNIT_W(100);
+				h=SZ_SCREEN_UNIT_H(100);
+				sizeEx=TEXT_SIZE(0.015);
+				size=1;
+				font="PuristaMedium";
+				colorBackground[]={0,0,0,0};
+				colorText[]={0.4,0.4,0.4,1};
+				shadow=true;
+				text="";
+			};
+			class WestScore : AbstractHUD
+			{
+				idc=23502;
+				x = safeZoneX + (37 * (safeZoneW / 100));
+				y = safeZoneY + (97.7 * (safeZoneH/100));
+				sizeEx=TEXT_SIZE(0.017);
+				colorText[]={0.5,0.5,1,1};
+				
+			};
+			class EastScore : AbstractHUD
+			{
+				idc=23503;
+				x = safeZoneX + (57.5 * (safeZoneW / 100));
+				y = safeZoneY + (97.7 * (safeZoneH/100));
+				sizeEx=TEXT_SIZE(0.017);
+				colorText[]={1,0.5,0.5,1};
+			};
+			class TimeClock : AbstractHUD
+			{
+				idc=23504;
+				x = safeZoneX + (48 * (safeZoneW / 100)); 
+				y = safeZoneY + (97.7 * (safeZoneH/100));
+				sizeEx=TEXT_SIZE(0.017);
+				colorText[]={1,1,1,1};
+			};
+			class BuildingCounter
+			{
+				idc=23505;
+				type = 8;
+				style = 0;
+				x = safeZoneX - 100;
+				y = safeZoneY - 100;
+				sizeEx=TEXT_SIZE(0.05);
+				w=SZ_SCREEN_UNIT_W(30);
+				h=SZ_SCREEN_UNIT_H(4);
+				colorFrame[] = {0,0,0,1};
+				colorBar[] = {1,0,0,0.8};
+				texture = "#(argb,8,8,3)color(1,1,1,1)";
+			};
+			class FriendlyNames : AbstractHUD
+			{
+				idc=23506;
+				sizeEx=TEXT_SIZE(0.015);
+				font = "TahomaB";
+			};
+			class ScreenHint : AbstractHUD
+			{
+				idc=23507;
+				x = safeZoneX; 
+				y = safeZoneY + (safeZoneH / 3);
+				sizeEx = TEXT_SIZE(0.026);
+				w=SZ_SCREEN_UNIT_W(100);
+				h=SZ_SCREEN_UNIT_H(100);
+				colorText[]={1,1,1,1};
+				shadow=false;
+			};
+			class RallyPoint : AbstractHUD
+			{
+				idc=23508;
+				style = ST_PICTURE;
+				text = "a3\ui_f\data\Map\Markers\Military\flag_CA.paa";
+				x=POS_SCREEN_UNIT_X(94);
+				y=POS_SCREEN_UNIT_Y(93.25);
+				w=SZ_SCREEN_UNIT_W(3);
+				h=SZ_SCREEN_UNIT_H(4.5);
+				colorText[]={0.4,0.4,0.4,0.9};
+			};
+			class RallyPointState : AbstractHUD
+			{
+				idc=23510;
+				style = 0;
+				text = "";
+				x=POS_SCREEN_UNIT_X(94);
+				y=POS_SCREEN_UNIT_Y(98);
+				w=SZ_SCREEN_UNIT_W(5);
+				h=SZ_SCREEN_UNIT_H(2);
+				colorText[]={0.5,0.5,0.5,0.9};
+				sizeEx = TEXT_SIZE(0.0171);
+			};
+			class EastTimer : AbstractHUD
+			{
+				idc=23511;
+				style = ST_PICTURE;
+				text = "a3\ui_f\data\IGUI\Cfg\Actions\settimer_ca.paa";
+				x=POS_SCREEN_UNIT_X(88.5);
+				y=POS_SCREEN_UNIT_Y(93.25);
+				w=SZ_SCREEN_UNIT_W(3);
+				h=SZ_SCREEN_UNIT_H(4.5);
+				colorText[]={1,0.5,0.5,1};
+			};
+			class WestTimer : AbstractHUD
+			{
+				idc=23512;
+				style = ST_PICTURE;
+				text = "a3\ui_f\data\IGUI\Cfg\Actions\settimer_ca.paa";
+				x=POS_SCREEN_UNIT_X(84.5);
+				y=POS_SCREEN_UNIT_Y(93.25);
+				w=SZ_SCREEN_UNIT_W(3);
+				h=SZ_SCREEN_UNIT_H(4.5);
+				colorText[]={0.5,0.5,1,1};
+			};
+			
+			class EastTimerText : AbstractHUD
+			{
+				idc=23518;
+				style = 0;
+				text = "";
+				x=POS_SCREEN_UNIT_X(88);
+				y=POS_SCREEN_UNIT_Y(97.75);
+				w=SZ_SCREEN_UNIT_W(4);
+				h=SZ_SCREEN_UNIT_H(2.25);
+				colorText[]={1,0.5,0.5,1};
+			};
+			class WestTimerText : AbstractHUD
+			{
+				idc=23517;
+				style = 0;
+				text = "";
+				x=POS_SCREEN_UNIT_X(84);
+				y=POS_SCREEN_UNIT_Y(97.75);
+				w=SZ_SCREEN_UNIT_W(4);
+				h=SZ_SCREEN_UNIT_H(2.25);
+				colorText[]={0.5,0.5,1,1};
+			};
+			class ChickenText : AbstractHUD
+			{
+				idc=23520;
+				style = ST_KEEP_ASPECT_RATIO;
+				text = "";
+				sizeEx = TEXT_SIZE(0.022);
+				font = "PuristaLight";
+				x = POS_SCREEN_UNIT_X(83.5);
+				y = POS_SCREEN_UNIT_Y(88);
+				w=SZ_SCREEN_UNIT_W(10);
+				h=SZ_SCREEN_UNIT_H(3);
+				colorText[]={0.7,1,0.7,0.9};
+				shadow = false;
+			};
+			class PlayerRank : AbstractHUD
+			{
+				idc=23521;
+				style = ST_PICTURE;
+				w=SZ_SCREEN_UNIT_W(1.5);
+				h=SZ_SCREEN_UNIT_H(2);
+				colorText[]={1,1,1,1};
+			};
+			class MyRankPic : AbstractHUD
+			{
+				idc=23522;
+				style = ST_PICTURE;
+				text = "";
+				x=POS_SCREEN_UNIT_X(1);
+				y=POS_SCREEN_UNIT_Y(93.25);
+				w=SZ_SCREEN_UNIT_W(3);
+				h=SZ_SCREEN_UNIT_H(3);
+				colorText[]={255/255,223/255,0/255,0.85};
+			};
+			class MyRankText : AbstractHUD
+			{
+				idc=23523;
+				text = "";
+				sizeEx=TEXT_SIZE(0.018);
+				x=POS_SCREEN_UNIT_X(0.75);
+				y=POS_SCREEN_UNIT_Y(96.25);
+				w=SZ_SCREEN_UNIT_W(4.25);
+				h=SZ_SCREEN_UNIT_H(2.25);
+				colorText[]={255/255,223/255,0/255,0.85};
+			};
+			class WaitingForPlayersText : AbstractHUD
+			{
+				idc=23524;
+				text = "";
+				sizeEx=TEXT_SIZE(0.036);
+				x=POS_SCREEN_UNIT_X(10);
+				y=POS_SCREEN_UNIT_Y(0.25);
+				w=SZ_SCREEN_UNIT_W(50);
+				h=SZ_SCREEN_UNIT_H(10);
+				colorText[]={255/255,223/255,0/255,0.85};
+			};
+			class Alpha : AbstractHUD
+			{
+				idc=23600;
+			};
+			class Bravo : AbstractHUD
+			{
+				idc=23601;
+			};
+			class Charlie : AbstractHUD
+			{
+				idc=23602;
+			};
+			class Delta : AbstractHUD
+			{
+				idc=23603;
+			};
+			class Echo : AbstractHUD
+			{
+				idc=23604;
+			};
+			class Foxtrot : AbstractHUD
+			{
+				idc=23605;
+			};
+			class Golf : AbstractHUD
+			{
+				idc=23606;
+			};
+			class Hotel : AbstractHUD
+			{
+				idc=23607;
+			};
+			class India : AbstractHUD
+			{
+				idc=23608;
+			};
+			class Juliet : AbstractHUD
+			{
+				idc=23609;
+			};
+			class Kilo : AbstractHUD
+			{
+				idc=23610;
+			};
+			class Lima : AbstractHUD
+			{
+				idc=23611;
+			};
+			
+			//Rally point slots
+			
+			class RP1 : AbstractHUD
+			{
+				idc=23612;
+			};
+			class RP2 : AbstractHUD
+			{
+				idc=23613;
+			};
+			class RP3 : AbstractHUD
+			{
+				idc=23614;
+			};
+			class RP4 : AbstractHUD
+			{
+				idc=23615;
+			};
+			class RP5 : AbstractHUD
+			{
+				idc=23616;
+			};
+			class RP6 : AbstractHUD
+			{
+				idc=23617;
+			};
+			class RP7 : AbstractHUD
+			{
+				idc=23618;
+			};
+			class RP8 : AbstractHUD
+			{
+				idc=23619;
+			};
+			class RP9 : AbstractHUD
+			{
+				idc=23620;
+			};
+			class RP10 : AbstractHUD
+			{
+				idc=23621;
+			};
+			class RP11 : AbstractHUD
+			{
+				idc=23622;
+			};
+			class RP12 : AbstractHUD
+			{
+				idc=23623;
+			};
+			class RP13 : AbstractHUD
+			{
+				idc=23624;
+			};
+			class RP14 : AbstractHUD
+			{
+				idc=23625;
+			};
+			class RP14A : AbstractHUD
+			{
+				idc=23626;
+			};
+			class RP14B : AbstractHUD
+			{
+				idc=23627;
+			};
+			class RP15 : AbstractHUD
+			{
+				idc=23628;
+			};
+			class RP16 : AbstractHUD
+			{
+				idc=23629;
+			};
+			class RP17 : AbstractHUD
+			{
+				idc=23630;
+			};
+			class RP18 : AbstractHUD
+			{
+				idc=23631;
+			};
+			class RP19 : AbstractHUD
+			{
+				idc=23632;
+			};
+			class RP20 : AbstractHUD
+			{
+				idc=23633;
+			};
+			class RP21 : AbstractHUD
+			{
+				idc=23634;
+			};
+			class RP22 : AbstractHUD
+			{
+				idc=23635;
+			};
+			class RP23 : AbstractHUD
+			{
+				idc=23636;
+			};
+			class RP24 : AbstractHUD
+			{
+				idc=23637;
+			};
+			class RP25 : AbstractHUD
+			{
+				idc=23638;
+			};
+			class RP26 : AbstractHUD
+			{
+				idc=23639;
+			};
+			class RP27 : AbstractHUD
+			{
+				idc=23640;
+			};
+			class RP28 : AbstractHUD
+			{
+				idc=23641;
+			};
+			class RP29 : AbstractHUD
+			{
+				idc=23642;
+			};
+			class RP30 : AbstractHUD
+			{
+				idc=23643;
+			};
+			class RP31 : AbstractHUD
+			{
+				idc=23644;
+			};
+			class RP32 : AbstractHUD
+			{
+				idc=23645;
+			};
+			class RP33 : AbstractHUD
+			{
+				idc=23646;
+			};
+			class RP34 : AbstractHUD
+			{
+				idc=23647;
+			};
+			class RP35 : AbstractHUD
+			{
+				idc=23648;
+			};
+			class RP36 : AbstractHUD
+			{
+				idc=23649;
+			};
+			class RP37 : AbstractHUD
+			{
+				idc=23650;
+			};
+			class RP38 : AbstractHUD
+			{
+				idc=23651;
+			};
+			class RP39 : AbstractHUD
+			{
+				idc=23652;
+			};
+			class RP40 : AbstractHUD
+			{
+				idc=23653;
+			};
+			class RP41 : AbstractHUD
+			{
+				idc=23654;
+			};
+			class RP42 : AbstractHUD
+			{
+				idc=23655;
+			};
+			class RP43 : AbstractHUD
+			{
+				idc=23656;
+			};
+			class RP44 : AbstractHUD
+			{
+				idc=23657;
+			};
+			class RP45 : AbstractHUD
+			{
+				idc=23658;
+			};
+			class RP46 : AbstractHUD
+			{
+				idc=23659;
+			};
+			class RP47 : AbstractHUD
+			{
+				idc=23660;
+			};
+			class RP48 : AbstractHUD
+			{
+				idc=23661;
+			};
+			class RP49 : AbstractHUD
+			{
+				idc=23662;
+			};
+			class RP50 : AbstractHUD
+			{
+				idc=23663;
+			};
+			class RP51 : AbstractHUD
+			{
+				idc=23664;
+			};
+			class RP52 : AbstractHUD
+			{
+				idc=23665;
+			};
+			class RP53 : AbstractHUD
+			{
+				idc=23666;
+			};
+			class RP54 : AbstractHUD
+			{
+				idc=23667;
+			};
+			class RP55 : AbstractHUD
+			{
+				idc=23668;
+			};
+			class RP56 : AbstractHUD
+			{
+				idc=23669;
+			};
+			class RP57 : AbstractHUD
+			{
+				idc=23670;
+			};
+			class RP58 : AbstractHUD
+			{
+				idc=23671;
+			};
+			class RP59 : AbstractHUD
+			{
+				idc=23672;
+			};
+			class RP60 : AbstractHUD
+			{
+				idc=23673;
+			};
+			class RP61 : AbstractHUD
+			{
+				idc=23674;
+			};
+			class RP62 : AbstractHUD
+			{
+				idc=23675;
+			};
+			class RP63 : AbstractHUD
+			{
+				idc=23676;
+			};
+			class RP64 : AbstractHUD
+			{
+				idc=23677;
+			};
+			class RP65 : AbstractHUD
+			{
+				idc=23678;
+			};
+			class RP66 : AbstractHUD
+			{
+				idc=23679;
+			};
+			class RP67 : AbstractHUD
+			{
+				idc=23680;
+			};
+			class RP68 : AbstractHUD
+			{
+				idc=23681;
+			};
+			class RP69 : AbstractHUD
+			{
+				idc=23682;
+			};
+			class RP70 : AbstractHUD
+			{
+				idc=23683;
+			};
+			class RP71 : AbstractHUD
+			{
+				idc=23684;
+			};
+			class RP72 : AbstractHUD
+			{
+				idc=23685;
+			};
+			class RP73 : AbstractHUD
+			{
+				idc=23686;
+			};
+			class RP74 : AbstractHUD
+			{
+				idc=23687;
+			};
+			class RP75 : AbstractHUD
+			{
+				idc=23688;
+			};
+			class RP76 : AbstractHUD
+			{
+				idc=23689;
+			};
+			class RP77 : AbstractHUD
+			{
+				idc=23690;
+			};
+			class RP78 : AbstractHUD
+			{
+				idc=23691;
+			};
+			class RP79 : AbstractHUD
+			{
+				idc=23692;
+			};
+			class RP80 : AbstractHUD
+			{
+				idc=23693;
+			};
+			class RP81 : AbstractHUD
+			{
+				idc=23694;
+			};
+			class RP82 : AbstractHUD
+			{
+				idc=23695;
+			};
+			class RP83 : AbstractHUD
+			{
+				idc=23696;
+			};
+			class RP84 : AbstractHUD
+			{
+				idc=23697;
+			};
+			class RP85 : AbstractHUD
+			{
+				idc=23698;
+			};
+			class RP86 : AbstractHUD
+			{
+				idc=23699;
+			};
+			class RP87 : AbstractHUD
+			{
+				idc=23700;
+			};
+			class RP88 : AbstractHUD
+			{
+				idc=23701;
+			};
+			class RP89 : AbstractHUD
+			{
+				idc=23702;
+			};
+			class RP90 : AbstractHUD
+			{
+				idc=23703;
+			};
+			class RP91 : AbstractHUD
+			{
+				idc=23704;
+			};
+			class RP92 : AbstractHUD
+			{
+				idc=23705;
+			};
+			class RP93 : AbstractHUD
+			{
+				idc=23706;
+			};
+			class RP94 : AbstractHUD
+			{
+				idc=23707;
+			};
+			class RP95 : AbstractHUD
+			{
+				idc=23708;
+			};
+			class RP96 : AbstractHUD
+			{
+				idc=23709;
+			};
+			class RP97 : AbstractHUD
+			{
+				idc=23710;
+			};
+			class RP98 : AbstractHUD
+			{
+				idc=23711;
+			};
+			class RP99 : AbstractHUD
+			{
+				idc=23712;
+			};
+			class RP100 : AbstractHUD
+			{
+				idc=23713;
+			};
+			class RP101 : AbstractHUD
+			{
+				idc=23714;
+			};
+			class RP102 : AbstractHUD
+			{
+				idc=23715;
+			};
+			
+		};   
+ 	};
+
+};
+/***************************************************************************
+End
+****************************************************************************/
+
+
+/***************************************************************************
+Sounds
+****************************************************************************/
+class CfgMusic
+{
+	tracks[] = {};
+	class FlagBeep
+	{
+		name = "flag_beep";   // how the sound is referred to in the editor (e.g. trigger effects)
+		sound[] = {"OPFL_SOUNDS\bombbeep.ogg", db+2.5, 1};   // filename, volume, pitch
+	};
+	class IntroMusic
+	{
+		name = "intro_music";   // how the sound is referred to in the editor (e.g. trigger effects)
+		sound[] = {"OPFL_SOUNDS\ValvesRemix.ogg", db+10, 1};   // filename, volume, pitch
+	};
+};
+
+//MIssionIntroMusic by Nitro/Noise - Menschmaschine
+class cfgSounds
+{
+	sounds[] = {};
+	class GotKill
+	{
+		name = "GotKill";
+		sound[] = {"PUBLIC_CODE_SYSTEM\kills.ogg", 1.5, 1};
+		titles[] = {};
+	};
+	class PlayerKitRefill
+	{
+		name = "PlayerKitsRefill";
+		sound[] = {"PLAYER_KITS\Sounds\PlayerKitsRefill.ogg", 1, 1};
+		titles[] = {};
+	};
+	class VoteRP
+	{
+		name = "VoteRP";
+		sound[] = {"ADVANCE_THE_FLAG\SOUNDS\vseffect.ogg", 1, 1};
+		titles[] = {};
+	};
+	class ButtonClick
+	{
+		name = "ButtonClick";
+		sound[] = {"ADVANCE_THE_FLAG\SOUNDS\buttonclick.ogg", 1.2, 1};
+		titles[] = {};
+	};
+	class FMove
+	{
+		name = "FMove";
+		sound[] = {"ADVANCE_THE_FLAG\SOUNDS\ffA.ogg", 1.2, 1};
+		titles[] = {};
+	};
+	class EMove
+	{
+		name = "EMove";
+		sound[] = {"ADVANCE_THE_FLAG\SOUNDS\efA.ogg", 1.2, 1};
+		titles[] = {};
+	};
+	class UnderAttack
+	{
+		name = "UnderAttack";
+		sound[] ={"ADVANCE_THE_FLAG\SOUNDS\flagunderattack.ogg", 1, 1};
+		titles[] = {};
+	};
+	class RPReady
+	{
+		name = "RPReady";
+		sound[] ={"ADVANCE_THE_FLAG\SOUNDS\rpready.ogg", 1, 1};
+		titles[] = {};
+	};
+	class dpl0
+	{
+		name = "dpl0";
+		sound[] = {"ADVANCE_THE_FLAG\SOUNDS\dpl0.wss", 0.3, 1};
+		titles[] = {};
+	};
+	class dpl1
+	{
+		name = "dpl1";
+		sound[] = {"ADVANCE_THE_FLAG\SOUNDS\dpl1.wss", 0.3, 1};
+		titles[] = {};
+	};
+	class dpl2
+	{
+		name = "dpl2";
+		sound[] = {"ADVANCE_THE_FLAG\SOUNDS\dpl2.wss", 0.3, 1};
+		titles[] = {};
+	};
+	class dpl0L
+	{
+		name = "dpl0L";
+		sound[] = {"ADVANCE_THE_FLAG\SOUNDS\dpl0.wss", 0.3, 0.9};
+		titles[] = {};
+	};
+	class dpl1L
+	{
+		name = "dpl1L";
+		sound[] = {"ADVANCE_THE_FLAG\SOUNDS\dpl1.wss", 0.3, 0.9};
+		titles[] = {};
+	};
+	class dpl2L
+	{
+		name = "dpl2L";
+		sound[] = {"ADVANCE_THE_FLAG\SOUNDS\dpl2.wss", 0.3, 0.9};
+		titles[] = {};
+	};
+	class dpl0H
+	{
+		name = "dpl0H";
+		sound[] = {"ADVANCE_THE_FLAG\SOUNDS\dpl0.wss", 0.3, 1.1};
+		titles[] = {};
+	};
+	class dpl1H
+	{
+		name = "dpl1H";
+		sound[] = {"ADVANCE_THE_FLAG\SOUNDS\dpl1.wss", 0.3, 1.1};
+		titles[] = {};
+	};
+	class dpl2H
+	{
+		name = "dpl2H";
+		sound[] = {"ADVANCE_THE_FLAG\SOUNDS\dpl2.wss", 0.3, 1.1};
+		titles[] = {};
+	};
+	class dpl0p
+	{
+		name = "dpl0p";
+		sound[] = {"ADVANCE_THE_FLAG\SOUNDS\dpl0.wss", 1, 1};
+		titles[] = {};
+	};
+	class dpl1p
+	{
+		name = "dpl1p";
+		sound[] = {"ADVANCE_THE_FLAG\SOUNDS\dpl1.wss", 1, 1};
+		titles[] = {};
+	};
+	class dpl2p
+	{
+		name = "dpl2p";
+		sound[] = {"ADVANCE_THE_FLAG\SOUNDS\dpl2.wss", 1, 1};
+		titles[] = {};
+	};
+};
+/***************************************************************************
+End
+****************************************************************************/
+
+
+/***************************************************************************
+Functions
+****************************************************************************/
+
+class CfgFunctions
+{
+	class OPFL
+	{
+		class PreInitScripts
+		{
+			class CompilePCS
+			{
+				file = "PUBLIC_CODE_SYSTEM\CompileFunctions.sqf";
+				preInit = 1;
+			};
+			class CompileOPFL
+			{
+				file = "ADVANCE_THE_FLAG\CompileFunctions.sqf";
+				preInit = 1;
+			};
+			
+			class CompilePKS
+			{
+				file = "PLAYER_KITS\CompileFunctions.sqf";
+				preInit = 1;
+			};
+			
+			class CompileRommel
+			{
+				file = "PUBLIC_CODE_SYSTEM\GLOBAL_SC_SCRIPTS\CompileRommel.sqf";
+				preInit = 1;
+			};
+			class CompileMoricky
+			{
+				file = "PUBLIC_CODE_SYSTEM\GLOBAL_SC_SCRIPTS\CompileMoricky.sqf";
+			};
+			class FindAMNV
+			{
+				file = "FindAllMissionNamespaceVariables.sqf";
+				preInit = 1;
+			};
+			class InitConnectionHandler
+			{
+				file = "PUBLIC_CODE_SYSTEM\InitPublicCodeSystem.sqf";
+				preInit = 1;
+			};
+			//class InitRotationMenuSystem
+			//{
+			//	file = "ROTATION_MENU_SYSTEM\InitRotationMenuSystem.sqf";
+			//	preInit = 1;
+			//};
+		};
+	};
+};
+
+/***************************************************************************
+END
+****************************************************************************/
+
+/***************************************************************************
+Debriefing
+****************************************************************************/
+class CfgDebriefing
+{  
+	class End1
+	{
+		title = "BLUE WINS";
+		subtitle = "";
+		description = "The blue side (WEST) has won the game!  Sorry red side...";
+		pictureBackground = "";
+		picture = "b_inf";
+		pictureColor[] = {0.0,0.3,0.6,1};
+	};
+	
+	class End2
+	{
+		title = "RED WINS";
+		subtitle = "";
+		description = "The red side (EAST) has won the game!  Sorry blue side...";
+		pictureBackground = "";
+		picture = "o_inf";
+		pictureColor[] = {0.6,0.2,0,1};
+	};
+
+	class End3
+	{
+		title = "TIE";
+		subtitle = "";
+		description = "Both sides held equal ground and suffered similar losses!  How about the next battle?";
+		pictureBackground = "";
+		picture = "flag_Altis";
+		pictureColor[] = {0.8,0.8,0.8,1};
+	};
+};
+/***************************************************************************
+END
+****************************************************************************/
+
+/***************************************************************************
+Loading screen
+****************************************************************************/
+
+#define LOADSCREENTEXT "OPFL"
+#define LOADSCREENDESCRIP "Advance The Flag"
+
+//loadScreen = LOADSCREEN;
+onLoadMission = LOADSCREENDESCRIP;
+Author = "Goschie";
+OnLoadName = LOADSCREENTEXT; 
+//onLoadMissionTime = false;
+/***************************************************************************
+End
+****************************************************************************/

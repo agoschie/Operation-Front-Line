@@ -1,0 +1,6 @@
+GSC_SPAWN_PROTECTED_AREAS = [];
+for "_i" from 1 to 4 do
+{
+	GSC_SPAWN_PROTECTED_AREAS pushBack format ["BATTLE_POSITION_WEST_%1", _i];
+	GSC_SPAWN_PROTECTED_AREAS pushBack format ["BATTLE_POSITION_EAST_%1", _i];
+};

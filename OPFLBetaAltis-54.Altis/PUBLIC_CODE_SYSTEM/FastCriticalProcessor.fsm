@@ -1,0 +1,28 @@
+class FSM
+{
+  fsmName = "CriticalProcessor";
+  class States
+  {
+    class _
+    {
+      name = "_";
+      init = "";
+      precondition = "";
+      class Links
+      {
+        class _
+        {
+          priority = 0.000000;
+          to= "_";
+          precondition = "";
+          condition= "if ((count PCS_CPQ) > 0) then {_ex = PCS_CPQ select 0; [(_ex select 0), (_ex select 1)] call PCS_CallFnc; PCS_CPQ set [0, -1];PCS_CPQ = PCS_CPQ - [-1];}; false";
+          action= "";
+        };
+      };
+    };
+  };
+  initState="_";
+  finalStates[] =
+  {
+  };
+};
