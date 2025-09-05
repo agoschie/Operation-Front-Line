@@ -1,3 +1,4 @@
+// PLEASE READ: OPFL was written when I was still teaching myself C++ with no formal education. As a result, the code could have been written much better in hindsight.
 // OPFL.cpp : Defines the exported functions for the DLL application.
 //
 #include "stdafx.h"
